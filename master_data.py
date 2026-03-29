@@ -48,27 +48,44 @@ def render_master_data_management():
                     if response.status_code == 200:
                         try:
                             resp_data = response.json()
-                            status = resp_data.get("status", "")
-                            message = resp_data.get("message", "Master data berhasil diproses oleh sistem.")
+                            is_success = False
+                            message = ""
                             
-                            if status == "success":
+                            # Cek Tipe Data JSON Response
+                            if isinstance(resp_data, list):
+                                is_success = True
+                                message = f"{len(resp_data)} baris data master baru berhasil ditambahkan/diperbarui."
+                                
+                            elif isinstance(resp_data, dict):
+                                status = resp_data.get("status")
+                                # Anggap sukses jika status "success" atau nilai status kosong/tidak ada
+                                if status == "success" or not status:
+                                    is_success = True
+                                    message = resp_data.get("message", "Master data berhasil diproses oleh sistem.")
+                                else:
+                                    message = resp_data.get("message", "Respon server mengindikasikan kegagalan.")
+
+                            # Tindakan saat Sukses
+                            if is_success:
                                 st.toast("Data master berhasil disinkronisasi!", icon="✅")
                                 st.success(f"✨ **Pembaruan Berhasil:** {message}")
                                 
                                 st.cache_data.clear()
-                                if st.button("🔄 Refresh Halaman", key="btn_refresh_success"):
+                                if st.button("🔄 Muat Ulang Data Terbaru", type="primary", key="btn_refresh_success"):
                                     st.rerun()
                             else:
                                 st.warning(f"⚠️ **Perhatian:** {message}")
+                                
                         except ValueError:
+                            # Exception jika respons bukan JSON
                             st.toast("Data master berhasil disinkronisasi!", icon="✅")
                             st.success("✨ **Pembaruan Berhasil!** Master Data telah dikirim ke backend.")
                             
                             # CLEAR CACHE: Membuang memori data lama
                             st.cache_data.clear()
                             
-                            # REFRESH UI: Tombol untuk force rerun
-                            if st.button("🔄 Refresh Halaman"):
+                            # REFRESH UI: Tombol untuk force rerun dengan parameter key yang unik
+                            if st.button("🔄 Muat Ulang Data Terbaru", type="primary", key="btn_refresh_valueerror"):
                                 st.rerun()
                     else:
                         st.error(f"🚨 **Gagal Memproses Data:** Terjadi kesalahan pada server (HTTP Status: {response.status_code})")
