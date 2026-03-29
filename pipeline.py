@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import time
 import io
+from datetime import datetime
 
 def render_validation_pipeline():
     st.title("Data Validation Pipeline 🚀")
@@ -82,9 +83,9 @@ def render_validation_pipeline():
         st.subheader("📊 Hasil Validasi Data")
         
         tab_ready, tab_error, tab_missing = st.tabs([
-            "✅ Ready for CERIA", 
-            "⚠️ Anomaly & Error", 
-            "🔍 Missing Entities"
+            "✅ Data Bersih", 
+            "⚠️ Data Bermasalah", 
+            "🔍 Data Belum Terdaftar"
         ])
         
         with tab_ready:
@@ -99,7 +100,7 @@ def render_validation_pipeline():
                 st.download_button(
                     label="⬇️ Download Excel (Ready Data)",
                     data=output_ready.getvalue(),
-                    file_name="ready_for_ceria.xlsx",
+                    file_name=f"data_bersih_{datetime.now().strftime('%Y-%m-%d_%H%M')}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
                 
@@ -115,7 +116,7 @@ def render_validation_pipeline():
                 st.download_button(
                     label="⬇️ Download Excel (Error Data)",
                     data=output_error.getvalue(),
-                    file_name="anomaly_and_error.xlsx",
+                    file_name=f"data_bermasalah_{datetime.now().strftime('%Y-%m-%d_%H%M')}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
                 
@@ -124,6 +125,17 @@ def render_validation_pipeline():
             st.dataframe(st.session_state.missing_df, width='stretch')
             
             if not st.session_state.missing_df.empty:
+                output_missing = io.BytesIO()
+                with pd.ExcelWriter(output_missing, engine='xlsxwriter') as writer:
+                    st.session_state.missing_df.to_excel(writer, index=False, sheet_name='Missing Data')
+                
+                st.download_button(
+                    label="⬇️ Download Excel (Missing Entities)",
+                    data=output_missing.getvalue(),
+                    file_name=f"data_belum_terdaftar_{datetime.now().strftime('%Y-%m-%d_%H%M')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+                
                 st.markdown("💡 *Gunakan tombol salin di pojok kanan boks di bawah ini untuk menyalin seluruh entitas yang hilang.*")
                 missing_text_output = st.session_state.missing_df.to_string(index=False)
                 st.code(missing_text_output, language="text")
