@@ -28,7 +28,7 @@ def render_validation_pipeline():
             time.sleep(2)
             progress_bar.progress(75)
             
-            api_url = "https://n8n.user.aispace.id/webhook-test/validate-raw-data"
+            api_url = "https://n8n.user.aispace.id/webhook/validate-raw-data"
             try:
                 files = {"File_Excel": (uploaded_file.name, uploaded_file.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
                 response = requests.post(api_url, files=files, timeout=3000)

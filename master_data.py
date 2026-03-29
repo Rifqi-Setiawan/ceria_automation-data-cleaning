@@ -39,7 +39,7 @@ def render_master_data_management():
     if st.button("Update Master Data", type="primary"):
         if master_file is not None:
             with st.spinner("Sedang memproses dan mengirim data ke AI Agent..."):
-                WEBHOOK_MASTER_URL = "https://n8n.user.aispace.id/webhook-test/upload-master-data"
+                WEBHOOK_MASTER_URL = "https://n8n.user.aispace.id/webhook/upload-master-data"
                 files = {'data_referensi': (master_file.name, master_file.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")}
                 
                 try:
